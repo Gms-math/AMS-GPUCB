@@ -164,28 +164,32 @@ The primary hypothesis is:
 The long-term objective is to determine whether Bayesian-guided cubing can improve large-scale Ramsey SAT computations relative to baseline AMS/MCTS.
 
 ---
-
 ---
 
-## Running Ramsey SAT Experiments
+## Running Large Ramsey Experiments on HPC
 
-To run larger Ramsey experiments such as:
+The current repository includes a small benchmark instance for testing the AMS-GP-UCB framework.
+
+For larger Ramsey experiments such as:
 
 - R(5,5)
 - R(8,3)
 - R(9,3)
 
-place the Ramsey SAT encoding file inside the repository directory.
+a corresponding Ramsey SAT encoding file must first be generated or obtained.
 
-Example naming convention:
+Examples:
 
 ```text
-R55.cnf
-R83.cnf
-R93.cnf
+R55.simp
+R83.simp
+R93.simp
 ```
+Note:
 
-or simplified/preprocessed versions:
+The current repository contains the AMS-GP-UCB framework and benchmark instance only.
+
+Large Ramsey SAT encoding files such as:
 
 ```text
 R55.simp
@@ -193,23 +197,40 @@ R83.simp
 R93.simp
 ```
 
+are not currently included in the repository and must either:
+
+- be generated separately using Ramsey SAT encoders, or
+- be obtained from existing Ramsey SAT benchmark datasets
+
+before running large-scale HPC experiments.
+
+These SAT instance files should be placed in the same directory as:
+
+```text
+main.py
+```
+
+before running the AMS-GP-UCB experiments.
+
 ---
 
-## Example HPC Commands
+## Example HPC Execution Commands
 
-### R(5,5) Experiment
+After placing the Ramsey SAT instance file into the repository directory, experiments can be launched using commands such as:
+
+### R(5,5)
 
 ```bash
 python -u main.py "R55.simp" -d 2 -m 500 -numMCTSSims 200 -o "R55_gpucb.cubes" -prod
 ```
 
-### R(8,3) Experiment
+### R(8,3)
 
 ```bash
 python -u main.py "R83.simp" -d 3 -m 1000 -numMCTSSims 500 -o "R83_gpucb.cubes" -prod
 ```
 
-### R(9,3) Experiment
+### R(9,3)
 
 ```bash
 python -u main.py "R93.simp" -d 3 -m 1500 -numMCTSSims 1000 -o "R93_gpucb.cubes" -prod
@@ -217,48 +238,27 @@ python -u main.py "R93.simp" -d 3 -m 1500 -numMCTSSims 1000 -o "R93_gpucb.cubes"
 
 ---
 
-## Parameter Notes
+## Parameter Descriptions
 
 - `-d`
   controls cubing depth
 
 - `-m`
-  controls the number of literals considered for branching
+  controls the number of branching literals considered
 
 - `-numMCTSSims`
-  controls the MCTS simulation budget
+  controls the Monte Carlo Tree Search simulation budget
 
-Larger Ramsey instances will generally require:
-- larger simulation counts
+Larger Ramsey instances generally require:
 - deeper cubing
+- larger simulation counts
+- increased memory allocation
 - HPC parallelization
-- larger memory allocations
 
 ---
 
-## Suggested HPC Scaling Strategy
+## Current Research Goal
 
-Recommended progression:
-
-| Experiment | Sims | Depth |
-|---|---:|---:|
-| Small validation | 50 | 1 |
-| Medium scaling | 200 | 2 |
-| Large scaling | 500 | 3 |
-| HPC intensive | 1000+ | 3+ |
-
-The primary goal is to compare:
-- cubing runtime
-- solver completion time
-- scaling behavior
-- cube quality
-
-between:
-- baseline AMS/MCTS
-- AMS-GP-UCB
-
-## Repository
-
-GitHub Repository:
+The primary objective is to test whether GP-UCB guided MCTS can reduce cubing runtime and improve scaling behavior relative to baseline AMS/MCTS on difficult Ramsey SAT instances.
 
 https://github.com/Gms-math/AMS-GPUCB
