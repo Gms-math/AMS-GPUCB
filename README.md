@@ -141,28 +141,6 @@ Before running large experiments, confirm the GP-UCB version of `MCTS.py` is act
 
 ---
 
-## Example GP-UCB Runs
-
-### Medium simulation experiment
-
-```bash
-python -u main.py "constraints_17_c_100000_2_2_0_final.simp" -d 1 -m 136 -numMCTSSims 100 -o "gpucb_100.cubes" -prod
-```
-
-### Larger scaling experiment
-
-```bash
-python -u main.py "constraints_17_c_100000_2_2_0_final.simp" -d 2 -m 136 -numMCTSSims 200 -o "gpucb_200.cubes" -prod
-```
-
-### Deep cubing experiment
-
-```bash
-python -u main.py "constraints_17_c_100000_2_2_0_final.simp" -d 3 -m 136 -numMCTSSims 500 -o "gpucb_500.cubes" -prod
-```
-
----
-
 ## Recommended HPC Metrics
 
 For each experiment record:
@@ -186,6 +164,98 @@ The primary hypothesis is:
 The long-term objective is to determine whether Bayesian-guided cubing can improve large-scale Ramsey SAT computations relative to baseline AMS/MCTS.
 
 ---
+
+---
+
+## Running Ramsey SAT Experiments
+
+To run larger Ramsey experiments such as:
+
+- R(5,5)
+- R(8,3)
+- R(9,3)
+
+place the Ramsey SAT encoding file inside the repository directory.
+
+Example naming convention:
+
+```text
+R55.cnf
+R83.cnf
+R93.cnf
+```
+
+or simplified/preprocessed versions:
+
+```text
+R55.simp
+R83.simp
+R93.simp
+```
+
+---
+
+## Example HPC Commands
+
+### R(5,5) Experiment
+
+```bash
+python -u main.py "R55.simp" -d 2 -m 500 -numMCTSSims 200 -o "R55_gpucb.cubes" -prod
+```
+
+### R(8,3) Experiment
+
+```bash
+python -u main.py "R83.simp" -d 3 -m 1000 -numMCTSSims 500 -o "R83_gpucb.cubes" -prod
+```
+
+### R(9,3) Experiment
+
+```bash
+python -u main.py "R93.simp" -d 3 -m 1500 -numMCTSSims 1000 -o "R93_gpucb.cubes" -prod
+```
+
+---
+
+## Parameter Notes
+
+- `-d`
+  controls cubing depth
+
+- `-m`
+  controls the number of literals considered for branching
+
+- `-numMCTSSims`
+  controls the MCTS simulation budget
+
+Larger Ramsey instances will generally require:
+- larger simulation counts
+- deeper cubing
+- HPC parallelization
+- larger memory allocations
+
+---
+
+## Suggested HPC Scaling Strategy
+
+Recommended progression:
+
+| Experiment | Sims | Depth |
+|---|---:|---:|
+| Small validation | 50 | 1 |
+| Medium scaling | 200 | 2 |
+| Large scaling | 500 | 3 |
+| HPC intensive | 1000+ | 3+ |
+
+The primary goal is to compare:
+- cubing runtime
+- solver completion time
+- scaling behavior
+- cube quality
+
+between:
+- baseline AMS/MCTS
+- AMS-GP-UCB
 
 ## Repository
 
