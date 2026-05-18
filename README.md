@@ -6,9 +6,9 @@ Optimized AlphaMapleSAT framework using Gaussian Process Upper Confidence Bound 
 
 ## Overview
 
-This repository contains an experimental extension of AlphaMapleSAT (AMS) integrating Bayesian Optimization methods into Monte Carlo Tree Search for combinatorial SAT solving and Ramsey theory experiments.
+AMS-GPUCB is an experimental extension of AlphaMapleSAT (AMS) integrating Bayesian Optimization methods into Monte Carlo Tree Search for combinatorial SAT solving and Ramsey theory experiments.
 
-The primary goal is to investigate whether Gaussian Process Upper Confidence Bound (GP-UCB) guidance can reduce cubing runtime and improve branching efficiency on difficult Ramsey SAT instances such as:
+The primary objective is to investigate whether Gaussian Process Upper Confidence Bound (GP-UCB) guidance can reduce cubing runtime and improve branching efficiency on difficult Ramsey SAT instances such as:
 
 - R(5,5)
 - R(8,3)
@@ -16,14 +16,14 @@ The primary goal is to investigate whether Gaussian Process Upper Confidence Bou
 
 The project compares:
 
-1. Classical AMS/MCTS using UCT selection
+1. Classical AMS/MCTS using UCT (Upper Confidence Bound applied to Trees)
 2. AMS-GP-UCB hybrid search
 
 ---
 
 ## Mathematical Motivation
 
-Classical MCTS uses the UCT (Upper Confidence Bound applied to Trees) formula:
+Classical Monte Carlo Tree Search uses the UCT formula:
 
 U = Q(s,a) + c * sqrt(N(s)) / (1 + N(s,a))
 
@@ -33,7 +33,7 @@ where:
 - N(s) = state visit count
 - N(s,a) = edge/action visit count
 
-This treats each branching action mostly independently.
+This approach learns branching decisions primarily through local search statistics.
 
 AMS-GP-UCB augments this with Bayesian Optimization:
 
@@ -45,7 +45,7 @@ where:
 - sigma(x) = uncertainty estimate
 - beta = exploration parameter
 
-This allows the search to generalize structural information across similar SAT/Ramsey states rather than relearning each branch independently.
+The GP-UCB model attempts to generalize structural information across similar SAT/Ramsey states rather than relearning each branch independently.
 
 ---
 
@@ -53,7 +53,7 @@ This allows the search to generalize structural information across similar SAT/R
 
 ```text
 main.py        Main experiment driver
-MCTS.py        MCTS search logic (baseline or GP-UCB version)
+MCTS.py        MCTS search logic (GP-UCB enabled version)
 gp_ucb.py      Gaussian Process helper implementation
 Coach.py       Cubing/search execution loop
 ksgraph/       Ramsey SAT game logic
@@ -64,7 +64,7 @@ requirements.txt Python package requirements
 
 ## Environment Setup
 
-Create a Python virtual environment and install dependencies:
+Create a Python virtual environment:
 
 ```bash
 python -m venv .venv
@@ -120,76 +120,30 @@ At 50 MCTS simulations, AMS-GP-UCB reduced cubing runtime by approximately 33% w
 
 The primary research goal of AMS-GPUCB is to scale Bayesian-guided cubing experiments toward larger Ramsey SAT instances using high-performance computing resources.
 
-Current planned experiments include:
+Planned Ramsey experiments include:
 
 - R(5,5)
 - R(8,3)
 - R(9,3)
 
-using larger MCTS simulation budgets and deeper cubing depths.
+using:
+- deeper cubing depths
+- larger branching budgets
+- increased MCTS simulation counts
+- HPC parallelization
 
----
-
-## Running AMS-GPUCB on HPC
-
-The GP-UCB version uses:
-
-- gp_ucb.py
-- GP-UCB enabled MCTS.py
-
-Before running large experiments, confirm the GP-UCB version of `MCTS.py` is active.
-
----
-
-## Recommended HPC Metrics
-
-For each experiment record:
-
-- Cubing time
-- Total runtime
-- Reward
-- Number of generated cubes
-- SAT solver completion time
-- Memory usage
-- Scaling behavior as simulations increase
-
----
-
-## Research Objective
-
-The primary hypothesis is:
-
-> Gaussian Process guided MCTS can reduce redundant combinatorial exploration in Ramsey SAT cubing by learning structural similarities between branching states.
-
-The long-term objective is to determine whether Bayesian-guided cubing can improve large-scale Ramsey SAT computations relative to baseline AMS/MCTS.
-
----
 ---
 
 ## Running Large Ramsey Experiments on HPC
 
-The current repository includes a small benchmark instance for testing the AMS-GP-UCB framework.
+The current repository contains:
+- the AMS-GP-UCB framework
+- benchmark experiments
+- GP-UCB enabled MCTS implementation
 
-For larger Ramsey experiments such as:
+Large Ramsey SAT encoding files are NOT currently included in the repository.
 
-- R(5,5)
-- R(8,3)
-- R(9,3)
-
-a corresponding Ramsey SAT encoding file must first be generated or obtained.
-
-Examples:
-
-```text
-R55.simp
-R83.simp
-R93.simp
-```
-Note:
-
-The current repository contains the AMS-GP-UCB framework and benchmark instance only.
-
-Large Ramsey SAT encoding files such as:
+Examples of expected Ramsey SAT encoding files:
 
 ```text
 R55.simp
@@ -197,40 +151,51 @@ R83.simp
 R93.simp
 ```
 
-are not currently included in the repository and must either:
-
+These Ramsey SAT encodings must either:
 - be generated separately using Ramsey SAT encoders, or
 - be obtained from existing Ramsey SAT benchmark datasets
 
-before running large-scale HPC experiments.
+before launching large-scale HPC experiments.
 
-These SAT instance files should be placed in the same directory as:
+Once obtained, the SAT instance files should be placed in the same directory as:
 
 ```text
 main.py
 ```
 
-before running the AMS-GP-UCB experiments.
+before running the experiments.
 
 ---
 
-## Example HPC Execution Commands
+## Example GP-UCB HPC Execution Commands
 
-After placing the Ramsey SAT instance file into the repository directory, experiments can be launched using commands such as:
+The following commands are intended for large-scale GP-UCB guided cubing experiments.
 
-### R(5,5)
+---
+
+### R(5,5) Medium-Scale Experiment
+
+Tests moderate cubing depth and simulation count for preliminary R(5,5) scaling behavior.
 
 ```bash
 python -u main.py "R55.simp" -d 2 -m 500 -numMCTSSims 200 -o "R55_gpucb.cubes" -prod
 ```
 
-### R(8,3)
+---
+
+### R(8,3) Large-Scale Experiment
+
+Increases branching literals and simulation budget for larger Ramsey SAT exploration.
 
 ```bash
 python -u main.py "R83.simp" -d 3 -m 1000 -numMCTSSims 500 -o "R83_gpucb.cubes" -prod
 ```
 
-### R(9,3)
+---
+
+### R(9,3) HPC Intensive Experiment
+
+Designed for large HPC runs with deeper cubing and heavy MCTS exploration.
 
 ```bash
 python -u main.py "R93.simp" -d 3 -m 1500 -numMCTSSims 1000 -o "R93_gpucb.cubes" -prod
@@ -257,8 +222,46 @@ Larger Ramsey instances generally require:
 
 ---
 
-## Current Research Goal
+## Recommended HPC Metrics
 
-The primary objective is to test whether GP-UCB guided MCTS can reduce cubing runtime and improve scaling behavior relative to baseline AMS/MCTS on difficult Ramsey SAT instances.
+For each experiment record:
+
+- Cubing time
+- Total runtime
+- Reward
+- Number of generated cubes
+- SAT solver completion time
+- Memory usage
+- Scaling behavior as simulations increase
+
+---
+
+## Research Objective
+
+The primary hypothesis is:
+
+> Gaussian Process guided MCTS can reduce redundant combinatorial exploration in Ramsey SAT cubing by learning structural similarities between branching states.
+
+The long-term objective is to determine whether Bayesian-guided cubing can improve large-scale Ramsey SAT computations relative to baseline AMS/MCTS.
+
+---
+
+## Current Status
+
+The current repository demonstrates:
+- a functional AMS-GP-UCB prototype
+- preliminary benchmark comparisons
+- scalable GP-UCB guided cubing experiments
+
+Large Ramsey experiments such as:
+- R(5,5)
+- R(8,3)
+- R(9,3)
+
+require corresponding SAT encodings and future HPC experimentation.
+
+---
+
+## Repository
 
 https://github.com/Gms-math/AMS-GPUCB
